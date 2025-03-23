@@ -1,10 +1,10 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
 const { request } = require('http')
 const cors = require('cors')
-
-
+const PhonebookDB = require("./models/phonebooks")
 
 const app = express()
 
@@ -47,12 +47,14 @@ let phonebook = [
 ]
 
 app.get('/api/persons', (request, response) => {
-  response.json(phonebook)
+  PhonebookDB.find({}).then(phonebook => {
+    response.json(phonebook)
+  })
 })
 
-app.get('/info', (request, response) => {
+app.get('/info', async (request, response) => {
     response.send(`
-        <h1>Phonebook has info for ${phonebook.length} people</h1>
+        <h1>Phonebook has info for ${await PhonebookDB.countDocuments({})} people</h1>
         <p>${new Date()}</p>
     `);
   })
@@ -77,20 +79,14 @@ app.post('/api/persons', (request, response) => {
     const body = request.body
     console.log("hello")
 
-    const person = {
+    const person = new PhonebookDB({
         name: body.name,
-        number: body.number,
-        id: Math.floor(Math.random() * (1000 - 1) + 1),
-    }
+        phone: body.phone,
+    })
 
-    phonebook = phonebook.concat(person)
-
-    response.json(person)
-
-
-
-
-
+    person.save().then(savedperson => {
+      response.json(savedperson)
+    })
 
 })
 
