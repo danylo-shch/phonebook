@@ -14,6 +14,7 @@ morgan.token('body', request => JSON.stringify(request.body))
 app.use(morgan(':method :url :body'))
 
 app.use(cors())
+app.use(express.static('dist'))
 
 
 app.use(express.json())
